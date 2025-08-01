@@ -4,42 +4,45 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a simple PDF translation utility that overlays translated text onto existing PDF documents while preserving the original layout and positioning. The project consists of a single Python script that uses PyMuPDF (fitz) to manipulate PDF files.
+This is a PDF translation utility that overlays translated text onto existing PDF documents while preserving the original layout and positioning. The project uses PyMuPDF (fitz) for PDF manipulation and integrates with the Anthropic Claude API for text translation.
+
+## Setup and Dependencies
+
+Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+Required environment setup:
+- Create a `.env` file with `ANTHROPIC_API_KEY` for Claude API access
+- Korean font file `fonts/NotoSerifKR-Regular.ttf` must be present for proper text rendering
 
 ## Architecture
 
-The codebase contains:
-- `tr_only_text.py`: Main translation function that extracts text from PDF pages, applies translation, and overlays the translated text while maintaining original positioning
-- `fonts/`: Directory containing Korean font files (NotoSansKR-Regular.otf) for proper text rendering
-- Sample PDFs for testing the translation functionality
+The codebase structure:
+- `tr_only_text.py`: Main script containing PDF processing and translation logic
+- `fonts/NotoSerifKR-Regular.ttf`: Korean font for translated text rendering
+- `.env`: Environment variables (ANTHROPIC_API_KEY)
+- `requirements.txt`: Python dependencies (PyMuPDF, dotenv, anthropic)
 
-## Core Functionality
+## Core Functions
 
-The `translate_pdf_overlay()` function:
-1. Opens a PDF document using PyMuPDF
-2. Extracts text blocks with position information
-3. Applies a translation function to each text span
-4. Covers original text with white rectangles
-5. Inserts translated text at the same position using specified fonts
-6. Saves the result as a new PDF with "_translated" suffix
+**`translate_pdf_overlay(pdf_path, translator_func)`**: Main function that processes PDF pages by extracting text blocks with position information, applying translation, covering original text with white rectangles, and overlaying translated text at the same positions.
 
-## Dependencies
-
-The project requires:
-- `PyMuPDF` (fitz) for PDF manipulation
-- Korean font file (NotoSansKR-Regular.otf) for proper text rendering
+**`translate_with_claude(text)`**: Translation function using Claude API (claude-3-haiku-20240307 model) that translates text to Korean with error handling for API failures.
 
 ## Running the Code
 
-To run the translation:
+Execute the translation process:
 ```bash
 python tr_only_text.py
 ```
 
-The script is currently configured to translate "1.pdf" and output "1_translated.pdf" using a simple lambda function that returns "번역됨" for all text.
+The script processes "1.pdf" and outputs "1_translated.pdf" using Claude API for translation.
 
 ## Development Notes
 
-- The script includes error handling for missing fonts and font insertion failures
-- Text positioning uses baseline calculations to maintain proper alignment
-- The translation function can be easily swapped by modifying the lambda function passed to `translate_pdf_overlay()`
+- Text positioning uses baseline calculations (`rect.y1 - 2`) for proper alignment
+- Fallback to "TRANSLATED" text if font insertion fails
+- Font objects are created using `fitz.Font(fontfile=font_path)`
+- API key assertion ensures environment is properly configured
